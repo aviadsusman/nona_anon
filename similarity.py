@@ -33,8 +33,8 @@ def S_1(x, a, b, t, eps=1e-12):
     return mask.log()
 
 def S_2(x, a, b, t, eps=1e-12):
-    mask = (t / (1-t)) * (t - x) * (x / b).log()
-    mask[x > b] = 1
+    mask = t / (1-t) * (b - x) * (x / b).log()
+    mask = torch.where(x <= b, mask, 0)
 
     return mask
 

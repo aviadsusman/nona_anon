@@ -90,7 +90,7 @@ def train_eval(train, val, test, model):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            
             train_loss += loss.item()
 
         train_loss /= len(train)
