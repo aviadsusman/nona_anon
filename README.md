@@ -2,7 +2,7 @@
 
 This repository contains the anonymized implementation for the paper:
 
-> **Title:** Nearness of Neighbors Attention for Regression in Supervised Fine-Tuning
+> **Title:** Nearness of Neighbors Attention for Regression in Supervised Fine-Tuning  
 > **Submitted to:** Neurips 2025
 
 ## Overview
