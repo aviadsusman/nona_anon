@@ -3,7 +3,6 @@
 This repository contains the anonymized implementation for the paper:
 
 > **Title:** Nearness of Neighbors Attention for Regression in Supervised Fine-Tuning
-> **Authors:** [Anonymized for Review]  
 > **Submitted to:** Neurips 2025
 
 ## Overview
@@ -15,7 +14,7 @@ This repository provides the full experimental pipeline, including model trainin
 ## Directory Structure  
 nona_anon/  
 ├── data/ # Experimental datasets.  
-│ └── DATASET_NAME/  
+│ └── dataset/  
 │  └── ...  
 │ └── dataset_classes.py # For building dataset specific dataloading  
 ├── models.py/ # NONA model components.  
