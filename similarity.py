@@ -39,36 +39,24 @@ def S_2(x, a, b, t, eps=1e-12):
     return mask
 
 class SoftStep(nn.Module):
-    def __init__(self, step_fn=2, dims=None, eps=1e-12):
+    def __init__(self, step_fn=2, mask_type='pointwise', eps=1e-12, dims=25):
         super().__init__()
+        self.eps = eps
         if step_fn == 1:
             self.step_fn = S_1
         elif step_fn == 2:
             self.step_fn = S_2
 
-        self.eps = eps
+        self.mask_type = mask_type
         self.dims = dims
-
-        if dims is None:
-            # Uniform mask: shared learnable parameters
-            self.params = nn.Parameter(torch.randn(3))
-            self.pointwise = False
-        else:
-            # Pointwise mask: MLP that outputs [a, b, t] per input
+        # Global m
+        # ask: shared learnable parameters
+        if self.mask_type == 'pointwise':
             self.pointwise = True
-            self.params = self.build_mlp(dims)
+            self.params = nn.Linear(dims, 3)
 
-    def build_mlp(self, dims):
-        if isinstance(dims, int):
-            dims = [dims]
-        layers = []
-        if len(dims) == 1:
-            layers += [nn.Linear(dims[0], 3), nn.Sigmoid()]
-        else:
-            for in_dim, out_dim in zip(dims[:-1], dims[1:]):
-                layers += [nn.Linear(in_dim, out_dim), nn.BatchNorm1d(out_dim), nn.Tanh()]
-            layers += [nn.Linear(dims[-1], 3), nn.Sigmoid()]
-        return nn.Sequential(*layers)
+        elif self.mask_type == 'global':
+            self.params = nn.Parameter(torch.randn(3))
 
     def forward(self, x, x_n, similarity):
         # Compute similarity
@@ -76,18 +64,20 @@ class SoftStep(nn.Module):
         sim_norm = norm_sim(sim)
 
         # Get parameters
-        if self.pointwise:
-            out = self.params(x)  # MLP(x) → [a, b, t]
-            a, b, t = [col.unsqueeze(-1).clamp(self.eps, 1 - self.eps) for col in out.T]
+        if self.mask_type=='pointwise':
+            out = torch.sigmoid(self.params(x)).clamp(self.eps, 1 - self.eps)
+            a, b, t = [col.unsqueeze(-1) for col in out.T]
         else:
             a, b, t = torch.sigmoid(self.params).clamp(self.eps, 1 - self.eps)
-
+        
+        if self.step_fn == S_1:
         # Adjust a to ensure at least one neighbor
-        if torch.equal(x, x_n):
-            top_sims = (sim_norm - sim_norm.diag().diag()).max(dim=1)[0]
-        else:
-            top_sims = sim_norm.max(dim=1)[0]
-        a = torch.minimum(a, top_sims.unsqueeze(-1)) - self.eps
+            if torch.equal(x, x_n):
+                top_sims = (sim_norm - sim_norm.diag().diag()).max(dim=1)[0]
+            else:
+                top_sims = sim_norm.max(dim=1)[0]
+            a = torch.minimum(a, top_sims.unsqueeze(-1)) - self.eps
+            b = a + b * (1 - a)
 
         # Compute softmask
         mask = self.step_fn(sim_norm, a, b, t)
