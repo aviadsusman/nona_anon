@@ -21,5 +21,6 @@ nona_anon/
 ├── similarity.py/ # Similarity matrix for NONA and SoftStep learned attention masking.  
 ├── utils.py/ # Shared helper functions.  
 ├── finetune.py # Perofrming supervised fine-tuning with NONA configs and dense benchmark.  
+├── synthetic_regression_surfaces.ipynb # For exploring comparative ability of models to fit continuously labeled data.  
 ├── requirements.txt # Python dependencies.  
 └── README.md # This file.  
