@@ -49,8 +49,7 @@ class SoftStep(nn.Module):
 
         self.mask_type = mask_type
         self.dims = dims
-        # Global m
-        # ask: shared learnable parameters
+        # Global mask: shared learnable parameters
         if self.mask_type == 'pointwise':
             self.pointwise = True
             self.params = nn.Linear(dims, 3)
