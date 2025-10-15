@@ -130,8 +130,6 @@ def train_eval(train, val, test, model):
             report = report + f': Val Score: {abs(val_score): .5f}'
         
         print(report)
-        if isinstance(mask, s.UniformSoftMask):
-            mask_params.append(deepcopy(mask.params.data).detach())
         
         epoch += 1
 
@@ -171,12 +169,10 @@ def train_eval(train, val, test, model):
                   'time': end-start}
 
     print(f"Test score: {model_objs['score']}")
-    if mask:
-        model_objs['mask weights'] = mask.state_dict() 
+    # if mask:
+    #     model_objs['mask weights'] = mask.state_dict() 
     if save_models:
         model_objs['model weights'] = model.state_dict()
-    if isinstance(mask, s.UniformSoftMask):
-        model_objs['mask params'] = mask_params
 
     print(f"Training and evaluating tuned knn on final embeddings.") 
     start = time.time()
